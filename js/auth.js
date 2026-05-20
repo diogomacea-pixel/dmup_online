@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIGURAÇÃO — substitua pela URL do seu Apps Script
 // ============================================================
-const API_URL = 'https://script.google.com/macros/s/AKfycbxcW98Cr5pTa-B5Cs17jYPzRR73N-88w3bGII3it1TK3Zuoki9WO_xrRl1ZmhzVhoSj/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbw1MjG1lFhXM0UMMsIwoNzRNuUtLqPncExMvxolZXIRVxHzD10FvcgUBIJckhaQCaC0/exec';
 
 // ============================================================
 // API
