@@ -87,12 +87,34 @@ function mostrarCarregando(ativo) {
 // CONFIG VISUAL (cores + logo dinâmicos)
 // ============================================================
 async function carregarConfig() {
-  const cache = localStorage.getItem('config_visual');
-  const config = cache ? JSON.parse(cache) : (await api('getConfig')).dados;
+  try {
+    const cacheLocal = localStorage.getItem('config_visual');
+    if (cacheLocal) {
+      try {
+        const cfg = JSON.parse(cacheLocal);
+        aplicarConfig(cfg);
+      } catch (e) {
+        console.warn('Config local inválida, limpando cache.');
+        localStorage.removeItem('config_visual');
+      }
+    }
 
-  if (!cache) localStorage.setItem('config_visual', JSON.stringify(config));
+    const res = await api('getConfig');
 
-  aplicarConfig(config);
+    if (!res || typeof res !== 'object') {
+      console.warn('Resposta inválida de getConfig, mantendo apenas config local.');
+      return;
+    }
+
+    if (res.status === 'ok') {
+      aplicarConfig(res.dados);
+      localStorage.setItem('config_visual', JSON.stringify(res.dados));
+    } else {
+      console.warn('Erro em getConfig:', res.mensagem);
+    }
+  } catch (e) {
+    console.error('Erro em carregarConfig:', e);
+  }
 }
 
 function aplicarConfig(config) {
