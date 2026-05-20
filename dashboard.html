@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — Streamers</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-layout">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img id="logoImg" src="assets/logo.png" alt="Logo" onerror="this.style.display='none'"/>
+      <span id="nomeStreamer">Carregando...</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item ativo" onclick="navegarPara('visaoGeral', this)">
+        <span class="icone">📊</span> Visão Geral
+      </button>
+      <button class="nav-item" onclick="navegarPara('minhasLives', this)">
+        <span class="icone">🎥</span> Minhas Lives
+      </button>
+      <button class="nav-item" onclick="navegarPara('metas', this)">
+        <span class="icone">🎯</span> Metas
+      </button>
+      <button class="nav-item" onclick="navegarPara('aprenda', this)">
+        <span class="icone">📚</span> Aprenda
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="nav-item" onclick="logout()">
+        <span class="icone">🚪</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <main class="main-content">
+
+    <!-- ========== VISÃO GERAL ========== -->
+    <section id="visaoGeral" class="pagina ativa">
+
+      <div class="header-dash">
+        <div>
+          <h2>Visão Geral</h2>
+          <p id="subtituloGeral">Carregando dados...</p>
+        </div>
+        <div class="seletor-periodo">
+          <button class="ativo" onclick="selecionarPeriodo('mes', this)">Este mês</button>
+          <button onclick="selecionarPeriodo('anterior', this)">Mês anterior</button>
+          <button onclick="selecionarPeriodo('tudo', this)">Tudo</button>
+        </div>
+      </div>
+
+      <!-- Cards principais -->
+      <div class="grid-metricas" id="gridMetricasPrincipais"></div>
+
+      <!-- Gráfico de evolução -->
+      <div class="card-tabela" style="margin-bottom:24px;">
+        <div class="card-tabela-header">
+          <h3>📈 Evolução por Live</h3>
+          <select id="seletorGrafico" onchange="atualizarGrafico()"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+            <option value="Espectadores">Espectadores</option>
+            <option value="Impressoes">Impressões</option>
+            <option value="Diamantes">Diamantes</option>
+            <option value="NovosSeguidores">Novos Seguidores</option>
+            <option value="ACU">ACU</option>
+          </select>
+        </div>
+        <div style="padding:20px;">
+          <canvas id="graficoEvolucao" height="100"></canvas>
+        </div>
+      </div>
+
+      <!-- Cards secundários -->
+      <div class="grid-metricas" id="gridMetricasSecundarias"></div>
+
+    </section>
+
+    <!-- ========== MINHAS LIVES ========== -->
+    <section id="minhasLives" class="pagina">
+
+      <div class="header-dash">
+        <div>
+          <h2>Minhas Lives</h2>
+          <p>Histórico completo de todas as suas transmissões</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="month" id="filtroMes"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:8px 12px;border-radius:8px;font-size:0.85rem;"
+            onchange="filtrarLives()"/>
+        </div>
+      </div>
+
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <h3>📋 Histórico de Lives</h3>
+          <span id="totalLivesFiltro" style="color:#888;font-size:0.85rem;"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tabelaLives">
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Tipo</th>
+                <th>Duração</th>
+                <th>Impressões</th>
+                <th>Espectadores</th>
+                <th>Pico</th>
+                <th>ACU</th>
+                <th>Tempo Médio</th>
+                <th>Comentários</th>
+                <th>Seguidores</th>
+                <th>Diamantes</th>
+                <th>Presentes</th>
+              </tr>
+            </thead>
+            <tbody id="corpoTabelaLives">
+              <tr>
+                <td colspan="12" style="text-align:center;color:#888;padding:32px;">
+                  Carregando...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========== METAS ========== -->
+    <section id="metas" class="pagina">
+
+      <div class="header-dash">
+        <div>
+          <h2>Metas do Mês</h2>
+          <p id="subtituloMetas">Acompanhe seu progresso</p>
+        </div>
+      </div>
+
+      <div class="grid-metas" id="gridMetas"></div>
+
+      <!-- Banner vídeos curtos -->
+      <div class="banner-alerta">
+        <div class="banner-icone">📱</div>
+        <div class="banner-texto">
+          <strong>Você sabia?</strong>
+          <p>34% dos usuários do TikTok <strong>nunca viram uma live</strong>.
+             Postar vídeos curtos diariamente é a melhor forma de atrair
+             novos espectadores para suas transmissões.</p>
+        </div>
+        <div class="banner-meta">
+          <span class="badge-meta">Meta: 1 vídeo/dia</span>
+        </div>
+      </div>
+
+      <!-- Gráfico diamantes por mês -->
+      <div class="card-tabela" style="margin-top:24px;">
+        <div class="card-tabela-header">
+          <h3>💎 Diamantes por Mês</h3>
+        </div>
+        <div style="padding:20px;">
+          <canvas id="graficoDiamantes" height="100"></canvas>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========== APRENDA ========== -->
+    <section id="aprenda" class="pagina">
+
+      <div class="header-dash">
+        <div>
+          <h2>Aprenda</h2>
+          <p>Entenda o que cada número significa e como melhorar</p>
+        </div>
+      </div>
+
+      <!-- Vídeo explicativo -->
+      <div class="card-tabela" style="margin-bottom:24px;">
+        <div class="card-tabela-header">
+          <h3>🎬 O que cada métrica significa?</h3>
+        </div>
+        <div style="padding:20px;">
+          <div class="placeholder-video">
+            <span>📹</span>
+            <p>Vídeo explicativo em breve</p>
+            <small>Aqui você aprenderá o significado de cada métrica do seu dashboard</small>
+          </div>
+        </div>
+      </div>
+
+      <!-- Glossário -->
+      <div class="grid-glossario" id="gridGlossario"></div>
+
+    </section>
+
+  </main>
+
+  <!-- ===================== LOADING ===================== -->
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="loading-spinner"></div>
+    <p>Carregando seus dados...</p>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

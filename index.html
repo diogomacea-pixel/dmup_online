@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard Streamers</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body class="tela-auth">
+
+  <div class="auth-card">
+    <div class="auth-logo">
+      <img id="logoImg" src="assets/logo.png" alt="Logo" onerror="this.style.display='none'" />
+      <h1>Dashboard <span>Streamers</span></h1>
+    </div>
+
+    <form id="formLogin">
+      <div class="campo">
+        <label>Usuário TikTok</label>
+        <input type="text" id="tiktok_usuario" placeholder="@seunome" required />
+      </div>
+      <div class="campo">
+        <label>Senha</label>
+        <input type="password" id="senha" placeholder="••••••••" required />
+      </div>
+      <button type="submit" class="btn-primary">Entrar</button>
+      <p class="link-secundario">
+        Ainda não tem conta? <a href="cadastro.html">Cadastrar</a>
+      </p>
+      <p class="link-secundario">
+        <a href="admin.html">Acesso Administrador</a>
+      </p>
+    </form>
+
+    <div id="msgErro" class="msg-erro oculto"></div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script>
+    document.getElementById('formLogin').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const usuario = document.getElementById('tiktok_usuario').value.replace('@','');
+      const senha   = document.getElementById('senha').value;
+
+      mostrarCarregando(true);
+      const res = await api('login', { tiktok_usuario: usuario, senha });
+      mostrarCarregando(false);
+
+      if (res.status === 'ok') {
+        salvarSessao(res.dados);
+        window.location.href = 'dashboard.html';
+      } else {
+        mostrarErro(res.mensagem);
+      }
+    });
+
+    // Aplicar configurações visuais
+    carregarConfig();
+  </script>
+</body>
+</html>

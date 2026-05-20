@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Admin — Dashboard Streamers</title>
+  <link rel="stylesheet" href="css/style.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dashboard-layout">
+
+  <!-- ===================== SIDEBAR ===================== -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <img id="logoImg" src="assets/logo.png" alt="Logo" onerror="this.style.display='none'"/>
+      <span>Administrador</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <button class="nav-item ativo" onclick="navegarPara('visaoAdmin', this)">
+        <span class="icone">📊</span> Visão Geral
+      </button>
+      <button class="nav-item" onclick="navegarPara('streamers', this)">
+        <span class="icone">👥</span> Streamers
+      </button>
+      <button class="nav-item" onclick="navegarPara('importar', this)">
+        <span class="icone">📥</span> Importar Dados
+      </button>
+      <button class="nav-item" onclick="navegarPara('logs', this)">
+        <span class="icone">📋</span> Logs de Acesso
+      </button>
+      <button class="nav-item" onclick="navegarPara('metas', this)">
+        <span class="icone">🎯</span> Metas
+      </button>
+      <button class="nav-item" onclick="navegarPara('configuracoes', this)">
+        <span class="icone">⚙️</span> Configurações
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <button class="nav-item" onclick="logout()">
+        <span class="icone">🚪</span> Sair
+      </button>
+    </div>
+  </aside>
+
+  <!-- ===================== CONTEÚDO ===================== -->
+  <main class="main-content">
+
+    <!-- ========== VISÃO GERAL ADMIN ========== -->
+    <section id="visaoAdmin" class="pagina ativa">
+      <div class="header-dash">
+        <div>
+          <h2>Visão Geral</h2>
+          <p>Resumo de todos os streamers da agência</p>
+        </div>
+        <div class="seletor-periodo">
+          <button class="ativo" onclick="selecionarPeriodoAdmin('mes', this)">Este mês</button>
+          <button onclick="selecionarPeriodoAdmin('anterior', this)">Mês anterior</button>
+          <button onclick="selecionarPeriodoAdmin('tudo', this)">Tudo</button>
+        </div>
+      </div>
+
+      <!-- Cards resumo geral -->
+      <div class="grid-metricas" id="gridResumoGeral"></div>
+
+      <!-- Ranking de streamers -->
+      <div class="card-tabela" style="margin-bottom:24px;">
+        <div class="card-tabela-header">
+          <h3>🏆 Ranking de Streamers</h3>
+          <select id="seletorRanking" onchange="renderizarRanking()"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:6px 10px;border-radius:6px;font-size:0.85rem;">
+            <option value="Diamantes">Diamantes</option>
+            <option value="Espectadores">Espectadores</option>
+            <option value="NovosSeguidores">Novos Seguidores</option>
+            <option value="DuracaoHoras">Horas Transmitidas</option>
+          </select>
+        </div>
+        <div style="overflow-x:auto;">
+          <table id="tabelaRanking">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Streamer</th>
+                <th>TikTok</th>
+                <th>Lives</th>
+                <th>Dias Ativos</th>
+                <th>Diamantes</th>
+                <th>Espectadores</th>
+                <th>Novos Seguidores</th>
+                <th>Meta Diamantes</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="corpoRanking"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Gráfico comparativo -->
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <h3>📈 Comparativo de Diamantes por Streamer</h3>
+        </div>
+        <div style="padding:20px;">
+          <canvas id="graficoComparativo" height="120"></canvas>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== STREAMERS ========== -->
+    <section id="streamers" class="pagina">
+      <div class="header-dash">
+        <div>
+          <h2>Streamers</h2>
+          <p>Gerenciamento de contas cadastradas</p>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <input type="text" id="buscaStreamer" placeholder="Buscar streamer..."
+            oninput="filtrarStreamers()"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:8px 14px;border-radius:8px;font-size:0.85rem;width:220px;"/>
+        </div>
+      </div>
+
+      <div class="grid-cards-streamers" id="gridStreamers"></div>
+    </section>
+
+    <!-- ========== IMPORTAR DADOS ========== -->
+    <section id="importar" class="pagina">
+      <div class="header-dash">
+        <div>
+          <h2>Importar Dados</h2>
+          <p>Envie o arquivo Excel exportado do Backstage</p>
+        </div>
+      </div>
+
+      <!-- Seletor de streamer -->
+      <div class="card-tabela" style="margin-bottom:24px;">
+        <div class="card-tabela-header">
+          <h3>📥 Importar Excel do Backstage</h3>
+        </div>
+        <div style="padding:24px;">
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;">
+            <div class="campo">
+              <label>Selecionar Streamer</label>
+              <select id="streamerImportar"
+                style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                       padding:12px 14px;border-radius:8px;font-size:0.95rem;width:100%;">
+                <option value="">Carregando streamers...</option>
+              </select>
+            </div>
+            <div class="campo">
+              <label>Arquivo Excel (.xlsx / .xls / .csv)</label>
+              <input type="file" id="arquivoExcel" accept=".xlsx,.xls,.csv"
+                onchange="preVisualizarExcel()"
+                style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                       padding:10px 14px;border-radius:8px;font-size:0.88rem;width:100%;"/>
+            </div>
+          </div>
+
+          <!-- Mapeamento de colunas -->
+          <div id="mapeamentoColunas" style="display:none;">
+            <h4 style="margin-bottom:16px;color:#aaa;font-size:0.9rem;
+                       text-transform:uppercase;letter-spacing:0.5px;">
+              🔗 Mapeamento de Colunas
+            </h4>
+            <div class="grid-mapeamento" id="gridMapeamento"></div>
+          </div>
+
+          <!-- Preview -->
+          <div id="previewImport" style="display:none;margin-top:20px;">
+            <h4 style="margin-bottom:12px;color:#aaa;font-size:0.9rem;
+                       text-transform:uppercase;letter-spacing:0.5px;">
+              👁️ Pré-visualização (primeiras 5 linhas)
+            </h4>
+            <div style="overflow-x:auto;">
+              <table id="tabelaPreview" style="font-size:0.8rem;"></table>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
+            <button class="btn-primary" onclick="importarDados()"
+              id="btnImportar" style="width:auto;padding:12px 32px;" disabled>
+              📤 Importar Dados
+            </button>
+            <button class="btn-secondary" onclick="limparImport()">
+              🗑️ Limpar
+            </button>
+          </div>
+
+          <div id="resultadoImport" class="oculto" style="margin-top:16px;"></div>
+        </div>
+      </div>
+
+      <!-- Histórico de importações -->
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <h3>📜 Histórico de Importações</h3>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Streamer</th>
+                <th>Registros Importados</th>
+                <th>Duplicatas Ignoradas</th>
+              </tr>
+            </thead>
+            <tbody id="corpoHistoricoImport">
+              <tr><td colspan="4" style="text-align:center;color:#888;padding:24px;">
+                Nenhuma importação registrada.
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== LOGS ========== -->
+    <section id="logs" class="pagina">
+      <div class="header-dash">
+        <div>
+          <h2>Logs de Acesso</h2>
+          <p>Histórico de acessos ao dashboard por streamer</p>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <input type="text" id="buscaLog" placeholder="Buscar por streamer..."
+            oninput="filtrarLogs()"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:8px 14px;border-radius:8px;font-size:0.85rem;width:200px;"/>
+          <input type="date" id="filtroDataLog" onchange="filtrarLogs()"
+            style="background:#1e1e1e;border:1px solid #2a2a2a;color:#e0e0e0;
+                   padding:8px 12px;border-radius:8px;font-size:0.85rem;"/>
+          <button class="btn-secondary" onclick="carregarLogs()">🔄 Atualizar</button>
+        </div>
+      </div>
+
+      <!-- Cards resumo de acesso -->
+      <div class="grid-metricas" id="gridResumoLogs" style="margin-bottom:24px;"></div>
+
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <h3>📋 Registro de Acessos</h3>
+          <span id="totalLogs" style="color:#888;font-size:0.85rem;"></span>
+        </div>
+        <div style="overflow-x:auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Data/Hora</th>
+                <th>Streamer</th>
+                <th>TikTok</th>
+                <th>Ação</th>
+                <th>Duração</th>
+              </tr>
+            </thead>
+            <tbody id="corpoLogs">
+              <tr><td colspan="5" style="text-align:center;color:#888;padding:24px;">
+                Carregando...
+              </td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== METAS ========== -->
+    <section id="metas" class="pagina">
+      <div class="header-dash">
+        <div>
+          <h2>Configurar Metas</h2>
+          <p>Defina os objetivos globais para todos os streamers</p>
+        </div>
+      </div>
+
+      <div class="card-tabela">
+        <div class="card-tabela-header">
+          <h3>🎯 Metas Globais</h3>
+        </div>
+        <div style="padding:28px;">
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:20px;">
+
+            <div class="campo">
+              <label>📅 Dias de live por mês (recomendado)</label>
+              <input type="number" id="metaDias" value="22" min="1" max="31"/>
+              <small>Padrão: 22 dias</small>
+            </div>
+
+            <div class="campo">
+              <label>⏱️ Horas de live por dia (mínimo)</label>
+              <input type="number" id="metaHoras" value="2" min="0.5" max="24" step="0.5"/>
+              <small>Padrão: 2 horas</small>
+            </div>
+
+            <div class="campo">
+              <label>📈 Crescimento de diamantes mês a mês (%)</label>
+              <input type="number" id="metaCrescimento" value="15" min="1" max="100"/>
+              <small>Padrão: 15% acima do mês anterior</small>
+            </div>
+
+            <div class="campo">
+              <label>💎 Meta de diamantes para streamers novos</label>
+              <input type="number" id="metaMoedasNovo" value="80000" min="1000"/>
+              <small>Para quem não tem histórico do mês anterior</small>
+            </div>
+          </div>
+
+          <div style="margin-top:24px;padding:16px;background:#13501B15;
+                      border:1px solid #13501B50;border-radius:10px;">
+            <p style="font-size:0.88rem;color:#aaa;line-height:1.7;">
+              💡 <strong style="color:#fff;">Como funciona o cálculo de metas:</strong><br/>
+              • Streamer com histórico: meta = diamantes do mês anterior × (1 + crescimento%)<br/>
+              • Streamer novo (sem dados anteriores): meta fixa de diamantes definida acima<br/>
+              • Meta de horas = dias por mês × horas por dia
+            </p>
+          </div>
+
+          <button class="btn-primary" onclick="salvarMetas()"
+            style="width:auto;padding:12px 32px;margin-top:20px;">
+            💾 Salvar Metas
+          </button>
+
+          <div id="msgMetas" class="oculto" style="margin-top:12px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== CONFIGURAÇÕES ========== -->
+    <section id="configuracoes" class="pagina">
+      <div class="header-dash">
+        <div>
+          <h2>Configurações</h2>
+          <p>Personalize a aparência do dashboard</p>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;flex-wrap:wrap;">
+
+        <!-- Cores -->
+        <div class="card-tabela">
+          <div class="card-tabela-header">
+            <h3>🎨 Cores do Sistema</h3>
+          </div>
+          <div style="padding:24px;">
+            <div class="campo">
+              <label>Cor Primária</label>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <input type="color" id="corPrimaria" value="#13501B"
+                  oninput="previewCor('--cor-primaria', this.value)"/>
+                <input type="text" id="corPrimariaHex" value="#13501B"
+                  oninput="sincronizarCor('corPrimaria', this.value)"
+                  style="flex:1;"/>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Cor Secundária</label>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <input type="color" id="corSecundaria" value="#C04F15"
+                  oninput="previewCor('--cor-secundaria', this.value)"/>
+                <input type="text" id="corSecundariaHex" value="#C04F15"
+                  oninput="sincronizarCor('corSecundaria', this.value)"
+                  style="flex:1;"/>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Cor Terciária</label>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <input type="color" id="corTerciaria" value="#78206E"
+                  oninput="previewCor('--cor-terciaria', this.value)"/>
+                <input type="text" id="corTerciariaHex" value="#78206E"
+                  oninput="sincronizarCor('corTerciaria', this.value)"
+                  style="flex:1;"/>
+              </div>
+            </div>
+            <div class="campo">
+              <label>Cor de Fundo</label>
+              <div style="display:flex;gap:10px;align-items:center;">
+                <input type="color" id="corFundo" value="#0a0a0a"
+                  oninput="previewCor('--cor-fundo', this.value)"/>
+                <input type="text" id="corFundoHex" value="#0a0a0a"
+                  oninput="sincronizarCor('corFundo', this.value)"
+                  style="flex:1;"/>
+              </div>
+            </div>
+            <button class="btn-secondary" onclick="resetarCores()"
+              style="margin-top:4px;">
+              ↩️ Restaurar padrão
+            </button>
+          </div>
+        </div>
+
+        <!-- Logo e preview -->
+        <div class="card-tabela">
+          <div class="card-tabela-header">
+            <h3>🖼️ Logo da Agência</h3>
+          </div>
+          <div style="padding:24px;">
+            <div class="campo">
+              <label>URL da imagem do logo</label>
+              <input type="text" id="logoUrl" placeholder="https://..."
+                oninput="previewLogo(this.value)"/>
+              <small>Recomendado: PNG transparente, máx. 200×80px</small>
+            </div>
+
+            <div style="background:#1a1a1a;border:1px solid #2a2a2a;border-radius:8px;
+                        padding:20px;text-align:center;margin-top:8px;min-height:80px;
+                        display:flex;align-items:center;justify-content:center;">
+              <img id="previewLogoImg" src="" alt=""
+                style="max-height:60px;display:none;"
+                onerror="this.style.display='none';
+                         document.getElementById('semLogo').style.display='block'"/>
+              <span id="semLogo" style="color:#555;font-size:0.85rem;">
+                Nenhum logo configurado
+              </span>
+            </div>
+
+            <!-- Preview do tema -->
+            <div style="margin-top:20px;">
+              <label style="display:block;font-size:0.85rem;color:#888;margin-bottom:10px;">
+                Preview do tema atual:
+              </label>
+              <div id="previewTema" style="background:var(--cor-fundo);border:1px solid #2a2a2a;
+                  border-radius:8px;padding:16px;display:flex;gap:10px;flex-wrap:wrap;">
+                <span id="prev1" style="padding:8px 16px;border-radius:6px;
+                      background:var(--cor-primaria);color:#fff;font-size:0.85rem;">Primária</span>
+                <span id="prev2" style="padding:8px 16px;border-radius:6px;
+                      background:var(--cor-secundaria);color:#fff;font-size:0.85rem;">Secundária</span>
+                <span id="prev3" style="padding:8px 16px;border-radius:6px;
+                      background:var(--cor-terciaria);color:#fff;font-size:0.85rem;">Terciária</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Senha admin -->
+      <div class="card-tabela" style="margin-top:20px;">
+        <div class="card-tabela-header">
+          <h3>🔐 Alterar Senha do Administrador</h3>
+        </div>
+        <div style="padding:24px;">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+            <div class="campo">
+              <label>Senha atual</label>
+              <input type="password" id="senhaAtual" placeholder="••••••••"/>
+            </div>
+            <div class="campo">
+              <label>Nova senha</label>
+              <input type="password" id="novaSenha" placeholder="••••••••" minlength="6"/>
+            </div>
+            <div class="campo">
+              <label>Confirmar nova senha</label>
+              <input type="password" id="confirmarSenha" placeholder="••••••••"/>
+            </div>
+          </div>
+          <button class="btn-primary" onclick="alterarSenhaAdmin()"
+            style="width:auto;padding:12px 28px;margin-top:8px;">
+            🔒 Alterar Senha
+          </button>
+          <div id="msgSenha" class="oculto" style="margin-top:12px;"></div>
+        </div>
+      </div>
+
+      <!-- Botão salvar configurações -->
+      <div style="margin-top:20px;display:flex;justify-content:flex-end;gap:12px;">
+        <button class="btn-secondary" onclick="carregarConfig()">↩️ Descartar</button>
+        <button class="btn-primary" onclick="salvarConfiguracoes()"
+          style="width:auto;padding:13px 36px;">
+          💾 Salvar Configurações
+        </button>
+      </div>
+      <div id="msgConfig" class="oculto" style="margin-top:12px;"></div>
+    </section>
+
+  </main>
+
+  <!-- Modal de detalhes do streamer -->
+  <div id="modalStreamer" class="modal-overlay oculto">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 id="modalNome"></h3>
+        <button onclick="fecharModal()" style="background:none;border:none;
+          color:#888;font-size:1.4rem;cursor:pointer;">✕</button>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- Login admin (overlay inicial) -->
+  <div id="loginAdminOverlay" class="loading-overlay" style="flex-direction:column;gap:0;">
+    <div class="auth-card" style="max-width:380px;">
+      <div class="auth-logo">
+        <img id="logoImgLogin" src="assets/logo.png" alt="Logo"
+          onerror="this.style.display='none'"/>
+        <h1>Painel <span>Admin</span></h1>
+      </div>
+      <form id="formLoginAdmin">
+        <div class="campo">
+          <label>Senha de Administrador</label>
+          <input type="password" id="senhaAdmin" placeholder="••••••••" required/>
+        </div>
+        <button type="submit" class="btn-primary">Entrar</button>
+        <p class="link-secundario">
+          <a href="index.html">← Voltar para o login</a>
+        </p>
+      </form>
+      <div id="erroLoginAdmin" class="msg-erro oculto"></div>
+    </div>
+  </div>
+
+  <script src="js/auth.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>
