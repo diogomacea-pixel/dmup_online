@@ -701,11 +701,19 @@ function previewCor(variavel, valor) {
 
 function sincronizarCor(inputColorId, valor) {
   const el = document.getElementById(inputColorId);
-  if (el && /
-^
-#[0-9A-Fa-f]{6}
-$
-/.test(valor)) {
+  Copiar
+
+if (el) {
+  const regexHex = /^#[0-9A-Fa-f]{6}$/;
+  if (regexHex.test(valor)) {
+    el.value = valor;
+    const varName = '--' + inputColorId
+      .replace('Hex', '')
+      .replace(/([A-Z])/g, '-$1')
+      .toLowerCase();
+    document.documentElement.style.setProperty(varName, valor);
+  }
+}
     el.value = valor;
     // Atualiza a cor no root para refletir a mudança
     const varName = '--' + inputColorId.replace('Hex', '').replace(/([A-Z])/g, '-$1').toLowerCase();
